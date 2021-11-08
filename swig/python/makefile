@@ -1,0 +1,56 @@
+# standard compile options for the c++ executable
+FLAGS = -fPIC
+
+# the python interface through swig
+PYTHONI = -I"C:\Program Files\Python37_64\include"
+PYTHONL = -Xlinker -export-dynamic
+LIBFLAG = -lpython37 -L"C:\Program Files\Python37_64\libs"
+SWIGEXEC = "C:\Program Files\Swigwin\swig.exe"
+
+all: Postbinary_pylib
+
+Postbinary_pylib: Number_wrap.o Number.o Fractional_wrap.o Fractional.o ByteOrder.o Convert.o  Pb64_32p_wrap.o Postbinary_wrap.o
+	g++ $(PYTHONL) -shared Number_wrap.o Number.o Fractional_wrap.o Fractional.o ByteOrder.o Convert.o  Pb64_32p_wrap.o Postbinary_wrap.o -o _Postbinary.pyd $(LIBFLAG)
+
+# ----------------------------
+# Interface wrappers
+# main library
+Postbinary_wrap.o: Postbinary_wrap.cxx
+	g++ $(FLAGS) $(PYTHONI) -c Postbinary_wrap.cxx -o Postbinary_wrap.o
+Postbinary_wrap.cxx: Postbinary.i
+	$(SWIGEXEC) -c++ -python -o Postbinary_wrap.cxx Postbinary.i
+
+# Abstracts
+Number_wrap.o: Number_wrap.cxx
+	g++ $(FLAGS) $(PYTHONI) -c Number_wrap.cxx -o Number_wrap.o
+Number_wrap.cxx: Number.i
+	$(SWIGEXEC) -c++ -python -o Number_wrap.cxx Number.i
+
+Fractional_wrap.o: Fractional_wrap.cxx
+	g++ $(FLAGS) $(PYTHONI) -c Fractional_wrap.cxx -o Fractional_wrap.o
+Fractional_wrap.cxx: Fractional.i
+	$(SWIGEXEC) -c++ -python -o Fractional_wrap.cxx Fractional.i
+
+
+# Types
+Pb64_32p_wrap.o: Pb64_32p_wrap.cxx
+	g++ $(FLAGS) $(PYTHONI) -c Pb64_32p_wrap.cxx -o Pb64_32p_wrap.o
+Pb64_32p_wrap.cxx: Pb64_32p.i
+	$(SWIGEXEC) -c++ -python -o Pb64_32p_wrap.cxx Pb64_32p.i
+
+# ----------------------------
+# Source code
+# Abstracts
+Number.o: ../../src/Abstracts/Number.cpp
+	g++ $(FLAGS) -c  ../../src/Abstracts/Number.cpp
+Fractional.o:  ../../src/Abstracts/Fractional.cpp
+	g++ $(FLAGS) -c ../../src/Abstracts/Fractional.cpp
+
+# Utilities
+ByteOrder.o: ../../src/Utilities/ByteOrder.cpp
+	g++ $(FLAGS) -c ../../src/Utilities/ByteOrder.cpp
+Convert.o: ../../src/Utilities/Convert.cpp
+	g++ $(FLAGS) -c ../../src/Utilities/Convert.cpp
+
+	
+	
