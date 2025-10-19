@@ -1,14 +1,11 @@
 #pragma once
 #include "Number.h"
 
-namespace Postbinary { namespace Abstracts
-{
-    class Fractional : public Number
-    {
+namespace Postbinary { namespace Abstracts {
+    class Fractional : public Number {
     public:
         unsigned int _sizeOfExponent;
         unsigned int _sizeOfMantissa;
-
 
     public:
         Fractional(Constants::TetralogicalDigitCapacity tetritness, unsigned int sizeOfExponent, unsigned int sizeOfMantissa);
@@ -20,6 +17,9 @@ namespace Postbinary { namespace Abstracts
             void* number, unsigned int numberOfBytes);
 
         ~Fractional() { }
+
+        unsigned int getSizeOfExponent();
+        unsigned int getSizeOfMantissa();
 
     protected:
         void _getMinimumRange(void* number1, void* number2, unsigned int numberOfBytes);

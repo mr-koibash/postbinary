@@ -7,8 +7,7 @@
 namespace Postbinary { namespace Utilities {
 
     
-    class Convert
-    {
+    class Convert {
     public:
         static Constants::TetralogicalState boolToTetralogicalState(bool value);
     

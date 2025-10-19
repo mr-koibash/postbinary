@@ -13,10 +13,8 @@
 #include "../Service.h"
 #include "../Utilities.h"
 
-namespace Postbinary { namespace Abstracts
-{
-    class Number
-    {
+namespace Postbinary { namespace Abstracts {
+    class Number {
     private:
         pointer _begin;	// start of memory area
         pointer _end;	// end of memory area

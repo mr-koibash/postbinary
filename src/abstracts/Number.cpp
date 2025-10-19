@@ -1,9 +1,7 @@
-#include "../../headers/Abstracts/Number.h"
+#include "../../headers/abstracts/Number.h"
 
-namespace Postbinary { namespace Abstracts 
-{
-    Number::Number(Constants::BinaryDigitCapacity bitness)
-    {
+namespace Postbinary { namespace Abstracts {
+    Number::Number(Constants::BinaryDigitCapacity bitness) {
         // calculate number of bytes in binary form
         unsigned int _number_of_bytes = (unsigned int)bitness / (unsigned int)Constants::DigitNumbers::BITS_NUMBER_IN_BYTE;
 
@@ -18,31 +16,26 @@ namespace Postbinary { namespace Abstracts
     Number::Number(Constants::TetralogicalDigitCapacity tetritness) :
         Number::Number(Constants::BinaryDigitCapacity((unsigned int)tetritness * 2)) {   }
 
-    Number::~Number()
-    {
+    Number::~Number() {
         delete[] this->_begin;
     }
 
-    pointer Number::begin()
-    {
+    pointer Number::begin() {
         return this->_begin;
     }
 
-    pointer Number::end()
-    {
+    pointer Number::end() {
         return this->_end;
     }
 
 
     // --------From/to raw bytes methods--------
 
-    void Number::fromBytes(char* source)
-    {
+    void Number::fromBytes(char* source) {
         std::memcpy(this->_begin, source, (unsigned int)this->sizeInBytes());
     }
 
-    void Number::toBytes(char** begin, int& size)
-    {
+    void Number::toBytes(char** begin, int& size) {
         *begin = (char*)this->begin();
         size = this->sizeInBytes();
     }
@@ -50,37 +43,31 @@ namespace Postbinary { namespace Abstracts
 
     // --------Size methods--------
 
-    int Number::sizeInBytes()
-    {
+    int Number::sizeInBytes() {
         return (int)(this->_end - this->_begin);
     }
 
-    int Number::sizeInBits()
-    {
+    int Number::sizeInBits() {
         return sizeInBytes() * (int)Constants::DigitNumbers::BITS_NUMBER_IN_BYTE;
     }
 
-    int Number::sizeInTetrits()
-    {
+    int Number::sizeInTetrits() {
         return sizeInBytes() * (int)Constants::DigitNumbers::TETRITS_NUMBER_IN_BYTE;
     }
 
     // --------Operator overload--------
 
-    Number& Number::operator= (Number& number)
-    {
+    Number& Number::operator= (Number& number) {
         std::memcpy(this->_begin, number._begin, (unsigned int)this->sizeInBytes());
         return *this;
     }
 
     // --------get-set methods--------
 
-    Constants::TetralogicalState Number::_getTetrit(unsigned int tetritIndex)
-    {
+    Constants::TetralogicalState Number::_getTetrit(unsigned int tetritIndex) {
         // check input variable
         bool out_of_range = tetritIndex < 0 || tetritIndex >= this->sizeInTetrits();
-        if (out_of_range)
-        {
+        if (out_of_range) {
             return Constants::TetralogicalState::A;
         }
 
@@ -98,25 +85,19 @@ namespace Postbinary { namespace Abstracts
 
         // 00 - A, 01 - FALSE, 10 - TRUE, 11 - M
         Constants::TetralogicalState tetralogicalState = Constants::TetralogicalState::A;
-        if (!_leftBit)
-        {
-            if (!_rightBit)
-            {
+        if (!_leftBit) {
+            if (!_rightBit) {
                 tetralogicalState = Constants::TetralogicalState::A;
             }
-            else
-            {
+            else {
                 tetralogicalState = Constants::TetralogicalState::FALSE;
             }
         }
-        else
-        {
-            if (!_rightBit)
-            {
+        else {
+            if (!_rightBit) {
                 tetralogicalState = Constants::TetralogicalState::TRUE;
             }
-            else
-            {
+            else {
                 tetralogicalState = Constants::TetralogicalState::M;
             }
         }
@@ -124,24 +105,20 @@ namespace Postbinary { namespace Abstracts
         return tetralogicalState;
     }
 
-    void Number::_setTetrit(int tetritIndex, Constants::TetralogicalState value)
-    {
+    void Number::_setTetrit(int tetritIndex, Constants::TetralogicalState value) {
         // check input variable
         bool out_of_range = tetritIndex < 0 || tetritIndex >= this->sizeInTetrits();
-        if (out_of_range)
-        {
+        if (out_of_range) {
             return;
         }
 
         this->_setTetritUnsafe(tetritIndex, value);
     }
 
-    void Number::_setAllTetrits(Constants::TetralogicalState value)
-    {
+    void Number::_setAllTetrits(Constants::TetralogicalState value) {
         byte byteValue = 0;
 
-        switch (value)
-        {
+        switch (value) {
         case Constants::TetralogicalState::A:
             byteValue = 0x00;   // 00 00 00 00
             break;
@@ -160,31 +137,27 @@ namespace Postbinary { namespace Abstracts
 
         // set every byte in number to complexMask
         pointer _last = this->_end - 1;
-        while (this->_begin <= _last)
-        {
+        while (this->_begin <= _last) {
             *_last = byteValue;
             _last--;
         }
     }
 
-    bool Number::_getBit(byte targetByte, unsigned int bitNumber)
-    {
+    bool Number::_getBit(byte targetByte, unsigned int bitNumber) {
         return (targetByte >> bitNumber) & 1;
     }
 
-    void Number::_setBit(byte& targetByte, unsigned int index, bool value)
-    {
-        if (value)
-        {
+    void Number::_setBit(byte& targetByte, unsigned int index, bool value) {
+        if (value) {
             targetByte |= (1 << index);
         }
-        else
+        else {
             targetByte &= ~(1 << index);
+        }
+
     }
 
-
-    void Number::_setTetritUnsafe(unsigned int tetritIndex, Constants::TetralogicalState value)
-    {
+    void Number::_setTetritUnsafe(unsigned int tetritIndex, Constants::TetralogicalState value) {
         // shift temp pointer to requiered byte
         byte _shift = (byte)(tetritIndex / (unsigned int)Constants::DigitNumbers::TETRITS_NUMBER_IN_BYTE);
         pointer _current = (this->_end - 1) - _shift;
@@ -194,8 +167,7 @@ namespace Postbinary { namespace Abstracts
         unsigned int _rightBitIdx = _bitPairNumber * 2;
         unsigned int _leftBitIdx = _rightBitIdx + 1;
 
-        switch (value)
-        {
+        switch (value) {
         case Constants::TetralogicalState::A:
             this->_setBit(*_current, _leftBitIdx, 0);
             this->_setBit(*_current, _rightBitIdx, 0);

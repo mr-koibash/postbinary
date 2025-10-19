@@ -7,8 +7,7 @@
 
 namespace Postbinary { namespace Utilities {
 
-    class ByteOrder
-    {
+    class ByteOrder {
     public:
         /// <summary>
         /// Select high order byte of the numbers depending on the little-endian/big-endian of arhitecture
