@@ -171,7 +171,10 @@ namespace Postbinary { namespace Abstracts {
                     }
 
                     isExponentAlreadyDifferent = isBitDifferent;
-                    Constants::TetralogicalState tetralogicalState = isBitDifferent ? Constants::TetralogicalState::M : Utilities::Convert::boolToTetralogicalState(bitOfFirstNumber);
+                    Constants::TetralogicalState tetralogicalState = isBitDifferent ?
+                        Constants::TetralogicalState::M :
+                        Utilities::Convert::boolToTetralogicalState(bitOfFirstNumber);
+
                     this->_setTetrit(bitIdx, tetralogicalState);
                     continue;
                 }
@@ -217,11 +220,6 @@ namespace Postbinary { namespace Abstracts {
                             // }
                         }
 
-
-
-
-
-
                         // if (!isMSerieEnd)
                         // {
                         //     if (isBitDifferent || !(isLowNumberSerieHasTrue && isHighNumberSerieHasFalse))
@@ -241,7 +239,10 @@ namespace Postbinary { namespace Abstracts {
                     }
 
                     isMantissaAlreadyDifferent = isBitDifferent;
-                    Constants::TetralogicalState tetralogicalState = isBitDifferent ? Constants::TetralogicalState::M : Utilities::Convert::boolToTetralogicalState(bitOfFirstNumber);
+                    Constants::TetralogicalState tetralogicalState = isBitDifferent ?
+                        Constants::TetralogicalState::M :
+                        Utilities::Convert::boolToTetralogicalState(bitOfFirstNumber);
+
                     this->_setTetrit(bitIdx, tetralogicalState);
 
                     if (tetralogicalState == Constants::TetralogicalState::M) {
