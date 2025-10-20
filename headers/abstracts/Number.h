@@ -69,7 +69,7 @@ namespace Postbinary { namespace Abstracts {
 
         Number& operator= (Number& number);
 
-    protected:
+    //protected:
 
         // --------get-set methods--------
 
