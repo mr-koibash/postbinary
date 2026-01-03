@@ -62,6 +62,64 @@ namespace Postbinary { namespace Abstracts {
         return *this;
     }
 
+    // --------Presentation methods--------
+
+    size_t Number::toString(char* buffer, size_t bufferSize) {
+        size_t tetritsCount = this->sizeInTetrits();
+
+        // validate space (including null-terminator)
+        if (bufferSize <= tetritsCount) {
+            return 0; // Error: too small buffer
+        }
+
+        size_t charIndex = 0;
+
+            for (std::size_t i = tetritsCount; i --> 0 ;) {
+                Constants::TetralogicalState tetrit = this->_getTetrit(i);
+                char c = '?';
+
+                switch(tetrit) {
+                    case Constants::TetralogicalState::A:     c = 'A'; break;
+                    case Constants::TetralogicalState::FALSE: c = '0'; break;
+                    case Constants::TetralogicalState::TRUE:  c = '1'; break;
+                    case Constants::TetralogicalState::M:     c = 'M'; break;
+                }
+                buffer[charIndex++] = c;
+            }
+
+            buffer[charIndex] = '\0'; // add null to end of string
+            return charIndex;
+    }
+
+    #if defined(__linux__) || defined(_WIN32) || defined(__APPLE__)
+        std::string Number::toString() {
+            std::string s;
+            s.reserve(this->sizeInTetrits());
+
+            for (std::size_t i = this->sizeInTetrits(); i --> 0 ;) {
+                Constants::TetralogicalState tetrit = this->_getTetrit(i);
+                switch(tetrit) {
+                    case Constants::TetralogicalState::A:
+                        s.push_back('A');
+                        break;
+
+                    case Constants::TetralogicalState::FALSE:
+                        s.push_back('0');
+                        break;
+
+                    case Constants::TetralogicalState::TRUE:
+                        s.push_back('1');
+                        break;
+
+                    case Constants::TetralogicalState::M:
+                        s.push_back('M');
+                        break;
+                }
+            }
+            return s;
+        }
+    #endif
+
     // --------get-set methods--------
 
     Constants::TetralogicalState Number::_getTetrit(unsigned int tetritIndex) {

@@ -13,6 +13,11 @@
 #include "../Service.h"
 #include "../Utilities.h"
 
+#if defined(__linux__) || defined(_WIN32) || defined(__APPLE__)
+    #include <string>
+    #include <iostream> // Если нужен cout для отладки
+#endif
+
 namespace Postbinary { namespace Abstracts {
     class Number {
     private:
@@ -68,6 +73,24 @@ namespace Postbinary { namespace Abstracts {
         // --------Operator overload--------
 
         Number& operator= (Number& number);
+
+        // --------Presentation methods--------
+
+        /// <summary>
+        /// Get string presentation of postbinary number
+        /// </summary>
+        /// <param name="buffer">pointer to empty char array</param>
+        /// <param name="bufferSize">size of char array</param>
+        /// <returns>number of written chars</returns>
+        size_t toString(char* buffer, size_t bufferSize);
+
+        #if defined(__linux__) || defined(_WIN32) || defined(__APPLE__)
+        /// <summary>
+        /// Get string presentation of postbinary number
+        /// </summary>
+        /// <returns>string presentation of postbinary number</returns>
+        std::string toString();
+        #endif
 
     //protected:
 
