@@ -17,6 +17,7 @@ namespace Postbinary { namespace Utilities {
         Convert::_tetritToRange(tetralogicalState, leftBoundary, rightBoundary, isMimimumRange);
     }
 
+#if defined(__linux__) || defined(_WIN32) || defined(__APPLE__)
     std::string Convert::binaryToString(void* number, unsigned int numberOfBytes) {
         pointer byteOfNumber = Utilities::ByteOrder::getHighOrderByteInNumber(number, numberOfBytes);
         int offset = Utilities::ByteOrder::isLittleEndian() ? -1 : 1;
@@ -48,6 +49,7 @@ namespace Postbinary { namespace Utilities {
 
         return s;
     }
+#endif
 
     // b1 - high order byte (e.g. sign & exponenta), b4 - low order byte (e.g. mantissa)
     void Convert::bytesToFloat(float* number, Postbinary::byte b1, Postbinary::byte b2, Postbinary::byte b3, Postbinary::byte b4) {

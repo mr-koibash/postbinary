@@ -15,7 +15,7 @@
 
 #if defined(__linux__) || defined(_WIN32) || defined(__APPLE__)
     #include <string>
-    #include <iostream> // Если нужен cout для отладки
+    #include <iostream>
 #endif
 
 namespace Postbinary { namespace Abstracts {

@@ -1,11 +1,13 @@
 // Class provides convert methods between binary and tetralogical digits
 
 #pragma once
-#include <string>
 #include "ByteOrder.h"
 #include "../Constants.h"
 #include "../Service.h"
 
+#if defined(__linux__) || defined(_WIN32) || defined(__APPLE__)
+    #include <string>
+#endif
 
 namespace Postbinary { namespace Utilities {
 
@@ -19,7 +21,10 @@ namespace Postbinary { namespace Utilities {
         // Set M and A for range of two numbers: M is [0; 1] and A is [0; 1]
         static void tetritToMaximumRange(const Constants::TetralogicalState& tetralogicalState, bool& leftBoundary, bool& rightBoundary);
 
+    #if defined(__linux__) || defined(_WIN32) || defined(__APPLE__)
         static std::string binaryToString(void* number, unsigned int numberOfBytes);
+    #endif
+
         static void bytesToFloat(
             float* number,
             Postbinary::byte b1,
