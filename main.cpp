@@ -1,216 +1,121 @@
-#include <iostream>
+ #include <iostream>
 
 #include "Postbinary.h"
 
 
 
-// TODO
-//добавить враппер, методы getSizeOfExponent и getSizeOfMantissa во Fractional.h и Fractional.cpp, и добавить метод в строку битов
 
 
 
 
-namespace Postbinary {
+#include <algorithm>
+#include <iostream>
+#include <random>
+#include <chrono>
+#include <thread>
+#include <atomic>
+#include <functional>
+#include <iomanip>
 
-    class PostbinaryFractionalWrapper : Abstracts::Fractional {
-    public:
-        PostbinaryFractionalWrapper(Abstracts::Fractional& fractional) : Abstracts::Fractional(
-            (Postbinary::Constants::TetralogicalDigitCapacity) fractional.sizeInTetrits(),
-            fractional.getSizeOfExponent(),
-            fractional.getSizeOfMantissa()
-        ) {
-            // copy fractional number bytes to wrapper
-            int size;
-            char* fractionalBegin;
-            fractional.toBytes(&fractionalBegin, size);
-            this->fromBytes(fractionalBegin);
-        }
+class SensorSimulator {
+private:
+    std::random_device rd;
+    std::mt19937 gen;
+    std::normal_distribution<double> distribution;
+    
+    double meanValue;      // Среднее значение
+    double stdDeviation;   // Стандартное отклонение (погрешность)
+    int intervalMs;        // Интервал в миллисекундах
+    
+    std::atomic<bool> running{false};
 
-    #if defined(__linux__) || defined(_WIN32)
-        std::string toString() {
-            std::string s;
-            s.reserve(this->sizeInTetrits());
+public:
+    SensorSimulator(double mean, double stdDev, int intervalMilliseconds)
+        : gen(rd()), 
+          distribution(mean, stdDev),
+          meanValue(mean),
+          stdDeviation(stdDev),
+          intervalMs(intervalMilliseconds) {}
 
-            for (std::size_t i = this->sizeInTetrits(); i --> 0 ;) {
-                Constants::TetralogicalState tetrit = this->_getTetrit(i);
-                switch(tetrit) {
-                    case Constants::TetralogicalState::A:
-                        s.push_back('A');
-                        break;
-
-                    case Constants::TetralogicalState::FALSE:
-                        s.push_back('0');
-                        break;
-
-                    case Constants::TetralogicalState::TRUE:
-                        s.push_back('1');
-                        break;
-
-                    case Constants::TetralogicalState::M:
-                        s.push_back('M');
-                        break;
-                }
-            }   
-            return s;
-        }
-    #endif
-
-    };
-
-
-    inline bool _getBit(byte targetByte, unsigned int bitNumber) {
-        return (targetByte >> bitNumber) & 1;
+    // Генерация одного значения
+    double generateValue() {
+        return distribution(gen);
     }
 
-
-
-    // convert float to string of bits
-    std::string foo(void* number, unsigned int numberOfBytes)
-    {   
-        pointer byteOfNumber = Utilities::ByteOrder::getHighOrderByteInNumber(number, numberOfBytes);
-        int offset = Utilities::ByteOrder::isLittleEndian() ? -1 : 1;
-
-        // casting a binary bits from fractional number (sign, exponenta, mantissa) to postbinary
-        // cycle over each byte and each bit in the number
-        std::string s;
-        for (int byteCounter = numberOfBytes - 1; byteCounter >= 0; byteCounter--)
-        {
-            for (int bitCounter = (int)Constants::DigitNumbers::BITS_NUMBER_IN_BYTE - 1; bitCounter >= 0; bitCounter--)
-            {
-                // calculate the absolute index of the bit in the number
-                int bitIdx = byteCounter * (int)Constants::DigitNumbers::BITS_NUMBER_IN_BYTE + bitCounter;
-                
-                // get current bits of both numbers
-                //bool bitOfNumber = _get(*byteOfNumber >> bitCounter) & 1;
-                bool bitOfNumber = _getBit(*byteOfNumber, bitCounter);
-                
-
-                if (bitOfNumber) {
-                    s.push_back('1');
-                } else {
-                    s.push_back('0');
-                }
-            }
-
-            s.push_back(' ');
-            byteOfNumber += offset;
-        }
-
-        return s;
-    }
-
-
-    // b1 - high order byte, b4 - low order byte
-    void convertBitsToFloat(float* number, Postbinary::byte b1, Postbinary::byte b2, Postbinary::byte b3, Postbinary::byte b4) {
+    // Запуск непрерывной генерации с callback функцией
+    void startContinuous(std::function<void(double)> callback) {
+        running = true;
         
-
-
-        // 0 10000011 000100000011011011100
-        // 01000001 10001000 00011011 01110000
-
-        
-
-        
-        int numberOfBytes = 4;
-
-
-        pointer byteOfNumber = Utilities::ByteOrder::getHighOrderByteInNumber(number, numberOfBytes);
-        int offset = Utilities::ByteOrder::isLittleEndian() ? -1 : 1;
-
-        *byteOfNumber = *byteOfNumber & 0b00000000;
-        *byteOfNumber = *byteOfNumber | b1;
-        byteOfNumber += offset;
-
-        *byteOfNumber = *byteOfNumber & 0b00000000;
-        *byteOfNumber = *byteOfNumber | b2;
-        byteOfNumber += offset;
-
-        *byteOfNumber = *byteOfNumber & 0b00000000;
-        *byteOfNumber = *byteOfNumber | b3;
-        byteOfNumber += offset;
-
-        *byteOfNumber = *byteOfNumber & 0b00000000;
-        *byteOfNumber = *byteOfNumber | b4;
-        byteOfNumber += offset;
-
-        // casting a binary bits from fractional number (sign, exponenta, mantissa) to postbinary
-        // cycle over each byte and each bit in the number
-        std::string s;
-        for (int byteCounter = numberOfBytes - 1; byteCounter >= 0; byteCounter--)
-        {
-
+        while (running) {
+            auto startTime = std::chrono::steady_clock::now();
             
-
-            // for (int bitCounter = (int)Constants::DigitNumbers::BITS_NUMBER_IN_BYTE - 1; bitCounter >= 0; bitCounter--)
-            // {
-            //     // calculate the absolute index of the bit in the number
-            //     int bitIdx = byteCounter * (int)Constants::DigitNumbers::BITS_NUMBER_IN_BYTE + bitCounter;
-                
-            //     // get current bits of both numbers
-            //     //bool bitOfNumber = _get(*byteOfNumber >> bitCounter) & 1;
-            //     bool bitOfNumber = _getBit(*byteOfNumber, bitCounter);
-                
-
-            //     if (bitOfNumber) {
-            //         s.push_back('1');
-            //     } else {
-            //         s.push_back('0');
-            //     }
-            // }
-
-            // s.push_back(' ');
-            // byteOfNumber += offset;
+            double value = generateValue();
+            callback(value);
+            
+            auto endTime = std::chrono::steady_clock::now();
+            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                endTime - startTime).count();
+            
+            // Компенсация времени выполнения callback
+            int sleepTime = intervalMs - elapsed;
+            if (sleepTime > 0) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
+            }
         }
+    }
 
-        //return s;
+    void stop() {
+        running = false;
+    }
 
+    // Изменение параметров на лету
+    void setMean(double mean) {
+        meanValue = mean;
+        distribution = std::normal_distribution<double>(meanValue, stdDeviation);
+    }
 
+    void setStdDeviation(double stdDev) {
+        stdDeviation = stdDev;
+        distribution = std::normal_distribution<double>(meanValue, stdDeviation);
+    }
 
+    void setInterval(int intervalMilliseconds) {
+        intervalMs = intervalMilliseconds;
+    }
+};
 
+int visualiseResults() {
 
+       // Создаем симулятор: среднее=25.0, отклонение=2.0, интервал=500мс
+    SensorSimulator sensor(17.5, 0.258, 500);
 
+    std::cout << "Симулятор датчика запущен (Ctrl+C для остановки)\n";
+    std::cout << "Среднее значение: 25.0, Погрешность: ±2.0\n";
+    std::cout << "Интервал: 500 мс\n\n";
 
-}
-
-
-}
-
-
-
-// namespace Postbinary {
-
-//     class PostbinaryFractionalWrapper : Abstracts::Fractional {
-//     private:
+    // Запускаем генерацию с выводом в консоль
+    sensor.startContinuous([](double value) {
+        auto now = std::chrono::system_clock::now();
+        auto time = std::chrono::system_clock::to_time_t(now);
         
+        std::cout << "Время: " << std::put_time(std::localtime(&time), "%H:%M:%S") 
+                  << " | Значение: " << std::fixed << std::setprecision(2) 
+                  << value << std::endl;
+    });
 
-//     public:
-//         PostbinaryNumberWrapper(Abstracts::Number number) : Abstracts::Number(number.sizeInBits()) {
-
-//         }
-//     };
-
-
-// }
+    return 1;
+}
 
 
 
-
-
-
-int main() {
-
-
-    // 01000010 00111111 01100111 00111000 
-    // 01000010 01000100 10100100 10101000
-
+void createBordersFromBytes() {
     Postbinary::byte bl1 = 0b01000010;
     Postbinary::byte bl2 = 0b00111111;
     Postbinary::byte bl3 = 0b01100111;
     Postbinary::byte bl4 = 0b00111000;
 
-
     float lowIntervalBorder = 0;
-    Postbinary::convertBitsToFloat(&lowIntervalBorder, bl1, bl2, bl3, bl4);
+    Postbinary::Utilities::Convert::bytesToFloat(&lowIntervalBorder, bl1, bl2, bl3, bl4);
 
 
     Postbinary::byte bh1 = 0b01000010;
@@ -219,132 +124,206 @@ int main() {
     Postbinary::byte bh4 = 0b10101000;
 
     float highIntervalBorder = 0;
-    Postbinary::convertBitsToFloat(&highIntervalBorder, bh1, bh2, bh3, bh4);
+    Postbinary::Utilities::Convert::bytesToFloat(&highIntervalBorder, bh1, bh2, bh3, bh4);
+
+    std::cout << "Borders: [" << lowIntervalBorder << ", " << highIntervalBorder << "]" << std::endl;
+}
 
 
-
-    float a2 = 0;
-
-    /*
-    00100101
-    00111111
-
-    00011010
-    
-
-
-    11.001001 00001101 00010000 11110101
-    11.001001 00001111 11011010 11010011
-
-    11.001001 000011MM MMMAAAAA AAAAAAAA
-
-
-    ---
-
-
-
-    Гипотеза: что если будут единицы
-    0 10000011 0001 000 0001101101110001
-    0 10000011 0001 111 0000011000100101
-    Postbinary: 
-    0 10000011 0001 MMM AAAAAAAAAAAAAAM0
-
-    0 10000011 0001 000 1111111111111111 - больше нужного
-    0 10000011 0001 111 0000000000000001 - меньше нужного
-
-
-    0 10000011 0001 000 1110000010001110
-    0 10000011 0001 111 1111010111011010
-
-    0 10000011 0001 MMM MMMMAAAAAAAAAAM0
-
-    0 10000011 0001 000 0000111111111111 - всё ок
-    0 10000011 0001 111 1111000000000001 - меньше нужного
-
-    Решение: после первого совпадения - все дальнейшие должны быть М вплоть до первого несовпадения ВКЛЮЧИТЕЛЬНО
-    начиная с первого несовпадения+1 дальнейшие значения - А (исключая конец числа) 
-    
-    // апдейт - в таком варианте как выше будет факап, т.к. там и так 111, а остальная часть обнулится и итоговое число будет меньше
-
-
-    
-
-    Проблемы по низу:
-        - если было 0000011, а ставлю МММААААА, то при переходе будет больше необходимого: 0001111111
-
-    Т.е. в меньшем числе серия М либо:
-        - должна включать внутри себя число 1
-    В большем числе серия М должна:
-        - включать внутри себя число 0
-
-    Пока у обоих чисел внутри серии М нет 0 и 1, то продолжать алгоритм
-
-
-
-    // временное решение для статьи - подбирать эмпирически, сначала по правилу выше, а затем перебором до нужного результата (если диапазон неправильный)
-
-
-    3M 
-    4M Minimum range: [17.0625; 17.9375]
-    5M Minimum range: [17.0312; 17.9688]
-    6M Minimum range: [17.0156; 17.9844]
-    7M Minimum range: [17.0078; 17.9922] !!!
-
-    8M Minimum range: [17.0039; 17.9961] - уже более избыточно
-
-    */
-    
-
-
-
-
-
-    float a = 17.0078;
-    // float b = 49.1608;
-    float b = 17.9922;
-
-    // float a = 3.1414225;
-    // float b = 3.1415927;
-    std::cout << "Initial numbers: " << std::endl;
-    std::cout << a << std::endl;
-    std::cout << b << std::endl;
+void test(float& left, float& right) {
+    std::cout << "Initial range: [" << left << ", " << right << "]" << std::endl;
 
     std::cout << "Numbers bits: " << std::endl;
-    std::cout << Postbinary::foo(&a, 4) << std::endl;
-    std::cout << Postbinary::foo(&b, 4) << std::endl;
+    std::cout << Postbinary::Utilities::Convert::binaryToString(&left, 4) << std::endl;
+    std::cout << Postbinary::Utilities::Convert::binaryToString(&right, 4) << std::endl;
 
-    Postbinary::Pb64_32p p;
-    p.convertFromFloat(&a, &b);
+    Postbinary::Pb64_32p postbinaryNumber;
+    postbinaryNumber.convertFromFloat(&left, &right);
+    std::cout << "Postbinary: " << std::endl << postbinaryNumber.toString() << std::endl;
 
-
-
-    // p._setTetrit(10, Postbinary::Constants::TetralogicalState::A);
-    // p._setTetrit(9, Postbinary::Constants::TetralogicalState::A);
-    // p._setTetrit(8, Postbinary::Constants::TetralogicalState::A);
-    // p._setTetrit(7, Postbinary::Constants::TetralogicalState::A);
-    // p._setTetrit(6, Postbinary::Constants::TetralogicalState::A);
-    // p._setTetrit(5, Postbinary::Constants::TetralogicalState::A);
-    // p._setTetrit(4, Postbinary::Constants::TetralogicalState::A);
-    // p._setTetrit(3, Postbinary::Constants::TetralogicalState::A);
-    // p._setTetrit(2, Postbinary::Constants::TetralogicalState::A);
-
-
-
-
-
-    Postbinary::PostbinaryFractionalWrapper pw(p);
-    std::string s = pw.toString();
-    std::cout << "Postbinary: " << std::endl << s << std::endl; 
 
     float minRangeStart = 0;
     float minRangeEnd = 0;
-    p.getMinimumFloatRange(minRangeStart, minRangeEnd);
+    postbinaryNumber.getMinimumFloatRange(minRangeStart, minRangeEnd);
     std::cout << "Minimum range: [" << minRangeStart << "; " << minRangeEnd << "]" << std::endl;
 
 
     float maxRangeStart = 0;
     float maxRangeEnd = 0;
-    p.getMaximumFloatRange(maxRangeStart, maxRangeEnd);
+    postbinaryNumber.getMaximumFloatRange(maxRangeStart, maxRangeEnd);
     std::cout << "Maximum range: [" << maxRangeStart << "; " << maxRangeEnd << "]" << std::endl;
+}
+
+
+int main() {
+
+
+    createBordersFromBytes();
+
+
+    float a = 17.0134;
+    float b = 18.0928;
+    test(a, b);
+
+
+
+
+
+
+    // Создаем симулятор: среднее=25.0, отклонение=2.0, интервал=500мс
+
+    float averageResult = 17.554;   // 17.554 or 95.357
+    float deviation = 0.00258;        // 0.258 or
+    int interval = 62; // ms
+    SensorSimulator sensor(averageResult, deviation, interval);
+
+    std::cout << "Симулятор датчика запущен (Ctrl+C для остановки)\n";
+    std::cout << "Среднее значение: 25.0, Погрешность: ±2.0\n";
+    std::cout << "Интервал: 500 мс\n\n";
+
+
+    std::vector<float> measurements; 
+    float modifier = 0;
+
+    std::cout;
+
+    bool debugMode = false;
+    int counter = 0;
+
+
+    std::cout << "#,time,min,max,average,left,right,postbinary,left1,right1,average1,left2,right2,average2" << std::endl;
+
+    // Запускаем генерацию с выводом в консоль
+    sensor.startContinuous([&measurements, &modifier, &debugMode, &counter](float value) {
+
+
+        counter++;
+
+
+        int MEASUREMENTS_COUNT = 16;
+
+
+        // через 10 секунд начнет расти
+        if (measurements.size() >= MEASUREMENTS_COUNT && counter > 160 && counter <= 320) {
+            modifier += 0.0625;
+        } else
+
+        // ещё через 10 секунд начнет расти сильнее
+        if (measurements.size() >= MEASUREMENTS_COUNT && counter > 320 && counter <= 400) {
+            modifier += 0.625;
+        }
+
+        if (measurements.size() >= MEASUREMENTS_COUNT && counter > 400 && counter <= 480) {
+
+        }
+
+        if (measurements.size() >= MEASUREMENTS_COUNT && counter > 480) {
+            return;
+        }
+
+
+
+
+
+
+
+        auto now = std::chrono::system_clock::now();
+        auto time = std::chrono::system_clock::to_time_t(now);
+        
+        measurements.push_back(value + modifier);
+
+        // wait for minimum 16 measurements
+        if (measurements.size() < MEASUREMENTS_COUNT) {
+            return;
+        }
+
+        // remove old measurement
+        if (measurements.size() > MEASUREMENTS_COUNT) {
+            measurements.erase(measurements.begin());
+        }
+
+        // find min and max
+        float min = *std::min_element(measurements.begin(), measurements.end());
+        float max = *std::max_element(measurements.begin(), measurements.end());
+
+        // interval symmetrization
+        float average = 0;
+        for (float measurement : measurements) {
+            average += measurement;
+        }
+        average /= 16;
+
+        if (debugMode) {
+            std::cout << "[" << min << "; " << max << "]";
+        } else {
+            float time = (float) counter / 16;
+            std::cout << counter << "," << time << "," << min << "," << max << "," << average << ",";
+        }
+
+        float leftDiff = average - min;
+        float rightDiff = max - average;
+        float maxDiff = leftDiff < rightDiff ? rightDiff : leftDiff;
+        if (leftDiff < rightDiff) {
+            min = average - maxDiff;
+        } else {
+            max = average + maxDiff;
+        }
+
+        // TODO debug
+        if (debugMode) {
+            std::cout << ". --> Average: " << average << "; left: " << leftDiff << "; right: " << rightDiff << "; max: " << maxDiff << ". ---> " << "[" << min << "; " << max << "]" << std::endl;
+            std::cout << "Numbers bits: " << std::endl;
+        }
+
+        if (debugMode) {
+            std::cout << Postbinary::Utilities::Convert::binaryToString(&min, 4) << std::endl;
+            std::cout << Postbinary::Utilities::Convert::binaryToString(&max, 4) << std::endl;
+        }
+
+        Postbinary::Pb64_32p p;
+        p.convertFromFloat(&min, &max);
+
+        if (debugMode) {
+            std::cout << "Postbinary: " << std::endl << p.toString() << std::endl;
+        }
+
+        float minRangeStart = 0;
+        float minRangeEnd = 0;
+        p.getMinimumFloatRange(minRangeStart, minRangeEnd);
+
+        if (debugMode) {
+            std::cout << "Minimum range: [" << minRangeStart << "; " << minRangeEnd << "]" << std::endl;
+        }
+
+        float maxRangeStart = 0;
+        float maxRangeEnd = 0;
+        p.getMaximumFloatRange(maxRangeStart, maxRangeEnd);
+
+        if (debugMode) {
+            std::cout << "Maximum range: [" << maxRangeStart << "; " << maxRangeEnd << "]" << std::endl;
+            std::cout << std::endl;
+        }
+
+        float minAverage = (minRangeStart + minRangeEnd) / 2;
+        float maxAverage = (maxRangeStart + maxRangeEnd) / 2;
+
+
+        std::cout << min << "," << max << "," << p.toString() << "," << minRangeStart << "," << minRangeEnd << "," << minAverage << "," << maxRangeStart << "," << maxRangeEnd << "," << maxAverage << std::endl;
+
+
+
+
+
+
+
+/*
+        std::cout << "Время: " << std::put_time(std::localtime(&time), "%H:%M:%S") 
+                  << " | Значение: " << std::fixed << std::setprecision(2) 
+                  << value << std::endl;
+        */
+    });
+
+    return 0;
+
     
 }
