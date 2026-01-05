@@ -1,16 +1,19 @@
 # standard compile options for the c++ executable
 FLAGS = -fPIC
 
+# flags for swig
+SWIG_FLAGS = -c++ -python -D__linux__
+
 # the python interface through swig
-PYTHONI = -I"/usr/include/python3.8"
+PYTHONI = $(shell python3-config --includes)
 PYTHONL = -Xlinker -export-dynamic
-LIBFLAG = -lpython3 -L"/usr/lib/python3.8"
+LIBFLAG = $(shell python3-config --ldflags)
 SWIGEXEC = "/usr/bin/swig"
 
 all: Postbinary_pylib
 
-Postbinary_pylib: Number_wrap.o Number.o Fractional_wrap.o Fractional.o ByteOrder.o Convert.o  Pb64_32p_wrap.o Postbinary_wrap.o
-	g++ $(PYTHONL) -shared Number_wrap.o Number.o Fractional_wrap.o Fractional.o ByteOrder.o Convert.o  Pb64_32p_wrap.o Postbinary_wrap.o -o _Postbinary.so $(LIBFLAG)
+Postbinary_pylib: Number_wrap.o Number.o Fractional_wrap.o Fractional.o ByteOrder.o Convert.o  Pb64_32p_wrap.o Pb128_32ip_wrap.o Postbinary_wrap.o
+	g++ $(PYTHONL) -shared Number_wrap.o Number.o Fractional_wrap.o Fractional.o ByteOrder.o Convert.o  Pb64_32p_wrap.o Pb128_32ip_wrap.o Postbinary_wrap.o -o _Postbinary.so $(LIBFLAG)
 
 # ----------------------------
 # Interface wrappers
@@ -18,36 +21,41 @@ Postbinary_pylib: Number_wrap.o Number.o Fractional_wrap.o Fractional.o ByteOrde
 Postbinary_wrap.o: Postbinary_wrap.cxx
 	g++ $(FLAGS) $(PYTHONI) -c Postbinary_wrap.cxx -o Postbinary_wrap.o
 Postbinary_wrap.cxx: Postbinary.i
-	$(SWIGEXEC) -c++ -python -o Postbinary_wrap.cxx Postbinary.i
+	$(SWIGEXEC) $(SWIG_FLAGS) -o Postbinary_wrap.cxx Postbinary.i
 
 # Abstracts
 Number_wrap.o: Number_wrap.cxx
 	g++ $(FLAGS) $(PYTHONI) -c Number_wrap.cxx -o Number_wrap.o
 Number_wrap.cxx: Number.i
-	$(SWIGEXEC) -c++ -python -o Number_wrap.cxx Number.i
+	$(SWIGEXEC) $(SWIG_FLAGS) -o Number_wrap.cxx Number.i
 
 Fractional_wrap.o: Fractional_wrap.cxx
 	g++ $(FLAGS) $(PYTHONI) -c Fractional_wrap.cxx -o Fractional_wrap.o
 Fractional_wrap.cxx: Fractional.i
-	$(SWIGEXEC) -c++ -python -o Fractional_wrap.cxx Fractional.i
+	$(SWIGEXEC) $(SWIG_FLAGS) -o Fractional_wrap.cxx Fractional.i
 
 
 # Types
 Pb64_32p_wrap.o: Pb64_32p_wrap.cxx
 	g++ $(FLAGS) $(PYTHONI) -c Pb64_32p_wrap.cxx -o Pb64_32p_wrap.o
 Pb64_32p_wrap.cxx: Pb64_32p.i
-	$(SWIGEXEC) -c++ -python -o Pb64_32p_wrap.cxx Pb64_32p.i
+	$(SWIGEXEC) $(SWIG_FLAGS) -o Pb64_32p_wrap.cxx Pb64_32p.i
+
+Pb128_32ip_wrap.o: Pb128_32ip_wrap.cxx
+	g++ $(FLAGS) $(PYTHONI) -c Pb128_32ip_wrap.cxx -o Pb128_32ip_wrap.o
+Pb128_32ip_wrap.cxx: Pb128_32ip.i
+	$(SWIGEXEC) $(SWIG_FLAGS) -o Pb128_32ip_wrap.cxx Pb128_32ip.i
 
 # ----------------------------
 # Source code
 # Abstracts
-Number.o: ../../src/Abstracts/Number.cpp
-	g++ $(FLAGS) -c  ../../src/Abstracts/Number.cpp
-Fractional.o:  ../../src/Abstracts/Fractional.cpp
-	g++ $(FLAGS) -c ../../src/Abstracts/Fractional.cpp
+Number.o: ../../src/abstracts/Number.cpp
+	g++ $(FLAGS) -c  ../../src/abstracts/Number.cpp
+Fractional.o:  ../../src/abstracts/Fractional.cpp
+	g++ $(FLAGS) -c ../../src/abstracts/Fractional.cpp
 
 # Utilities
-ByteOrder.o: ../../src/Utilities/ByteOrder.cpp
-	g++ $(FLAGS) -c ../../src/Utilities/ByteOrder.cpp
-Convert.o: ../../src/Utilities/Convert.cpp
-	g++ $(FLAGS) -c ../../src/Utilities/Convert.cpp
+ByteOrder.o: ../../src/utilities/ByteOrder.cpp
+	g++ $(FLAGS) -c ../../src/utilities/ByteOrder.cpp
+Convert.o: ../../src/utilities/Convert.cpp
+	g++ $(FLAGS) -c ../../src/utilities/Convert.cpp

@@ -72,7 +72,7 @@ namespace Postbinary { namespace Abstracts {
 
         // --------Operator overload--------
 
-        Number& operator= (Number& number);
+        Number& operator= (const Number& number);
 
         // --------Presentation methods--------
 
@@ -92,7 +92,10 @@ namespace Postbinary { namespace Abstracts {
         std::string toString();
         #endif
 
-    //protected:
+        Constants::TetralogicalState getTetrit(unsigned int idx);
+        void setTetrit(int tetritIndex, Constants::TetralogicalState value);
+
+    protected:
 
         // --------get-set methods--------
 

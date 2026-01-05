@@ -1,11 +1,11 @@
 %module Fractional
 %{
-  #include "../../headers/Abstracts/Fractional.h"
+  #include "../../headers/abstracts/Fractional.h"
   using namespace Postbinary;
   using namespace Postbinary::Abstracts;
 %}
 
 
 
-%include "../../headers/Abstracts/Fractional.h"
+%include "../../headers/abstracts/Fractional.h"
 

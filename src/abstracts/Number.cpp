@@ -57,7 +57,7 @@ namespace Postbinary { namespace Abstracts {
 
     // --------Operator overload--------
 
-    Number& Number::operator= (Number& number) {
+    Number& Number::operator= (const Number& number) {
         std::memcpy(this->_begin, number._begin, (unsigned int)this->sizeInBytes());
         return *this;
     }
@@ -119,6 +119,14 @@ namespace Postbinary { namespace Abstracts {
             return s;
         }
     #endif
+
+    Constants::TetralogicalState Number::getTetrit(unsigned int tetritIndex) {
+        return this->_getTetrit(tetritIndex);
+    }
+
+    void Number::setTetrit(int tetritIndex, Constants::TetralogicalState value) {
+        this->_setTetrit(tetritIndex, value);
+    }
 
     // --------get-set methods--------
 

@@ -1,9 +1,11 @@
 %module Number
 %{
-  #include "../../headers/Abstracts/Number.h"
+  #include "../../headers/abstracts/Number.h"
   using namespace Postbinary;
   using namespace Postbinary::Abstracts;
 %}
+
+%include "std_string.i"
 
 
 %include "typemaps.i"
@@ -22,4 +24,4 @@
 %typemap(argout) (char **begin, int& size) {
     $result = PyBytes_FromStringAndSize(*$1, *$2);
 }
-%include "../../headers/Abstracts/Number.h"
+%include "../../headers/abstracts/Number.h"

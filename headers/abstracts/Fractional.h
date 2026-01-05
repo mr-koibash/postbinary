@@ -3,7 +3,7 @@
 
 namespace Postbinary { namespace Abstracts {
     class Fractional : public Number {
-    public:
+    protected:
         unsigned int _sizeOfExponent;
         unsigned int _sizeOfMantissa;
 

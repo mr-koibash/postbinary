@@ -1,6 +1,12 @@
  #include <iostream>
 
 #include "Postbinary.h"
+#include "SensorSimulator.h"
+
+int visualiseResults();
+void createBordersFromBytes();
+void test(float& left, float& right);
+void createTemperatureSimulator();
 
 
 
@@ -8,85 +14,59 @@
 
 
 
-#include <algorithm>
-#include <iostream>
-#include <random>
-#include <chrono>
-#include <thread>
-#include <atomic>
-#include <functional>
-#include <iomanip>
 
-class SensorSimulator {
-private:
-    std::random_device rd;
-    std::mt19937 gen;
-    std::normal_distribution<double> distribution;
-    
-    double meanValue;      // Среднее значение
-    double stdDeviation;   // Стандартное отклонение (погрешность)
-    int intervalMs;        // Интервал в миллисекундах
-    
-    std::atomic<bool> running{false};
 
-public:
-    SensorSimulator(double mean, double stdDev, int intervalMilliseconds)
-        : gen(rd()), 
-          distribution(mean, stdDev),
-          meanValue(mean),
-          stdDeviation(stdDev),
-          intervalMs(intervalMilliseconds) {}
+int main() {
 
-    // Генерация одного значения
-    double generateValue() {
-        return distribution(gen);
-    }
+    //// borders
+    createBordersFromBytes();
 
-    // Запуск непрерывной генерации с callback функцией
-    void startContinuous(std::function<void(double)> callback) {
-        running = true;
-        
-        while (running) {
-            auto startTime = std::chrono::steady_clock::now();
-            
-            double value = generateValue();
-            callback(value);
-            
-            auto endTime = std::chrono::steady_clock::now();
-            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-                endTime - startTime).count();
-            
-            // Компенсация времени выполнения callback
-            int sleepTime = intervalMs - elapsed;
-            if (sleepTime > 0) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
-            }
-        }
-    }
+    //// test
+    float a = 17.0134;
+    float b = 18.0928;
 
-    void stop() {
-        running = false;
-    }
 
-    // Изменение параметров на лету
-    void setMean(double mean) {
-        meanValue = mean;
-        distribution = std::normal_distribution<double>(meanValue, stdDeviation);
-    }
+    Postbinary::Pb128_32ip pb = Postbinary::Pb128_32ip(17.0134, 17.0134, 18.0928, 18.0928);
 
-    void setStdDeviation(double stdDev) {
-        stdDeviation = stdDev;
-        distribution = std::normal_distribution<double>(meanValue, stdDeviation);
-    }
+    // to bytes
+    char* pbBegin;
+    int pbSize;
+    pb.toBytes(&pbBegin, pbSize);
 
-    void setInterval(int intervalMilliseconds) {
-        intervalMs = intervalMilliseconds;
-    }
-};
+    // from bytes
+    Postbinary::Pb128_32ip pb1;
+    pb1.fromBytes(pbBegin);
+
+
+
+
+    std::cout << pb.toString() << std::endl;
+
+    Postbinary::Pb64_32p left = pb1.getLeft();
+    std::cout << "Left:  " << left.toString() << std::endl;
+
+    Postbinary::Pb64_32p right = pb1.getRight();
+    std::cout << "Right: " << right.toString() << std::endl;
+
+
+
+
+
+
+
+    test(a, b);
+
+    // termoresistor
+    createTemperatureSimulator();
+
+    return 0;
+}
+
+
 
 int visualiseResults() {
 
-       // Создаем симулятор: среднее=25.0, отклонение=2.0, интервал=500мс
+    // Создаем симулятор: среднее=25.0, отклонение=2.0, интервал=500мс
     SensorSimulator sensor(17.5, 0.258, 500);
 
     std::cout << "Симулятор датчика запущен (Ctrl+C для остановки)\n";
@@ -97,9 +77,9 @@ int visualiseResults() {
     sensor.startContinuous([](double value) {
         auto now = std::chrono::system_clock::now();
         auto time = std::chrono::system_clock::to_time_t(now);
-        
-        std::cout << "Время: " << std::put_time(std::localtime(&time), "%H:%M:%S") 
-                  << " | Значение: " << std::fixed << std::setprecision(2) 
+
+        std::cout << "Время: " << std::put_time(std::localtime(&time), "%H:%M:%S")
+                  << " | Значение: " << std::fixed << std::setprecision(2)
                   << value << std::endl;
     });
 
@@ -154,22 +134,7 @@ void test(float& left, float& right) {
     std::cout << "Maximum range: [" << maxRangeStart << "; " << maxRangeEnd << "]" << std::endl;
 }
 
-
-int main() {
-
-
-    createBordersFromBytes();
-
-
-    float a = 17.0134;
-    float b = 18.0928;
-    test(a, b);
-
-
-
-
-
-
+void createTemperatureSimulator() {
     // Создаем симулятор: среднее=25.0, отклонение=2.0, интервал=500мс
 
     float averageResult = 17.554;   // 17.554 or 95.357
@@ -182,7 +147,7 @@ int main() {
     std::cout << "Интервал: 500 мс\n\n";
 
 
-    std::vector<float> measurements; 
+    std::vector<float> measurements;
     float modifier = 0;
 
     std::cout;
@@ -222,14 +187,9 @@ int main() {
         }
 
 
-
-
-
-
-
         auto now = std::chrono::system_clock::now();
         auto time = std::chrono::system_clock::to_time_t(now);
-        
+
         measurements.push_back(value + modifier);
 
         // wait for minimum 16 measurements
@@ -317,13 +277,11 @@ int main() {
 
 
 /*
-        std::cout << "Время: " << std::put_time(std::localtime(&time), "%H:%M:%S") 
-                  << " | Значение: " << std::fixed << std::setprecision(2) 
+        std::cout << "Время: " << std::put_time(std::localtime(&time), "%H:%M:%S")
+                  << " | Значение: " << std::fixed << std::setprecision(2)
                   << value << std::endl;
         */
     });
 
-    return 0;
 
-    
 }
