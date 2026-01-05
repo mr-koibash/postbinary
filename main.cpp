@@ -42,11 +42,11 @@ int main() {
 
     std::cout << pb.toString() << std::endl;
 
-    Postbinary::Pb64_32p left = pb1.getLeft();
-    std::cout << "Left:  " << left.toString() << std::endl;
+    Postbinary::Pb64_32p* left = pb1.getLeft();
+    std::cout << "Left:  " << left->toString() << std::endl;
 
-    Postbinary::Pb64_32p right = pb1.getRight();
-    std::cout << "Right: " << right.toString() << std::endl;
+    Postbinary::Pb64_32p* right = pb1.getRight();
+    std::cout << "Right: " << right->toString() << std::endl;
 
 
 

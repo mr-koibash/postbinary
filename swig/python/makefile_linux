@@ -59,3 +59,7 @@ ByteOrder.o: ../../src/utilities/ByteOrder.cpp
 	g++ $(FLAGS) -c ../../src/utilities/ByteOrder.cpp
 Convert.o: ../../src/utilities/Convert.cpp
 	g++ $(FLAGS) -c ../../src/utilities/Convert.cpp
+
+clean:
+	rm -f *.o *.cxx
+	rm -rf __pycache__

@@ -54,28 +54,28 @@ namespace Postbinary {
             this->_setTetrit(0, Constants::TetralogicalState::M);       // bits: 11
         }
 
-        Pb64_32p getLeft() {
-            Pb64_32p _left = Pb64_32p();
+        Pb64_32p* getLeft() {
+            Pb64_32p* _left = new Pb64_32p();
             for (size_t i = (size_t) Constants::TetralogicalDigitCapacity::T_64; i --> this->fractionalNumberSize + this->identificatorSize;) {
                 size_t tetritIdx = i - (size_t) Constants::TetralogicalDigitCapacity::T_32;
-                _left.setTetrit(tetritIdx, this->getTetrit(i));
+                _left->setTetrit(tetritIdx, this->getTetrit(i));
             }
 
-            _left.setTetrit(1, Constants::TetralogicalState::M);
-            _left.setTetrit(0, Constants::TetralogicalState::FALSE);
+            _left->setTetrit(1, Constants::TetralogicalState::M);
+            _left->setTetrit(0, Constants::TetralogicalState::FALSE);
 
             return _left;
         }
 
-        Pb64_32p getRight() {
-            Pb64_32p _right = Pb64_32p();
+        Pb64_32p* getRight() {
+            Pb64_32p* _right = new Pb64_32p();
             for (size_t i = this->fractionalNumberSize + this->identificatorSize; i --> this->identificatorSize;) {
                 size_t tetritIdx = i - this->borderIdentificatorSize;
-                _right.setTetrit(tetritIdx, this->getTetrit(i));
+                _right->setTetrit(tetritIdx, this->getTetrit(i));
             }
 
-            _right.setTetrit(1, Constants::TetralogicalState::M);
-            _right.setTetrit(0, Constants::TetralogicalState::FALSE);
+            _right->setTetrit(1, Constants::TetralogicalState::M);
+            _right->setTetrit(0, Constants::TetralogicalState::FALSE);
 
             return _right;
         }
