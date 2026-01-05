@@ -34,3 +34,11 @@
 build
 
 run.sh
+
+# swig
+*.cxx
+__pycache__/
+Postbinary.py
+Pb*.py
+Number.py
+Fractional.py
