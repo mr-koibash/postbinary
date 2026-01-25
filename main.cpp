@@ -25,6 +25,12 @@ int main() {
     float a = 17.0134;
     float b = 18.0928;
 
+    // a = 2.76;
+    // b = 3.24;
+
+    test(a, b);
+
+
 
     Postbinary::Pb128_32ip pb = Postbinary::Pb128_32ip(17.0134, 17.0134, 18.0928, 18.0928);
 
@@ -54,7 +60,7 @@ int main() {
 
 
 
-    test(a, b);
+
 
     // termoresistor
     createTemperatureSimulator();

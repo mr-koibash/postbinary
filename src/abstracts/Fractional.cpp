@@ -183,78 +183,93 @@ namespace Postbinary { namespace Abstracts {
                 if (mantissaCounter > 0) {
                     mantissaCounter--;
 
-                    // set all rest exponenta part to AAA... if the difference was found
-                    if (isMantissaAlreadyDifferent) {
+                    Constants::TetralogicalState postbinaryBit = bitOfFirstNumber == false ?
+                            Constants::TetralogicalState::M :
+                            Constants::TetralogicalState::A;
 
-
-                        if (!isBitDifferent) {
-                            isSerieMCoincidenceFound = true;
-                        }
-
-                        // if (isSecondMRequired) {
-                        //     // set second M after first M tetrit
-                        //     this->_setTetrit(bitIdx, Constants::TetralogicalState::M);
-                        //     isSecondMRequired = false;
-                        //     continue;
-                        // }
-
-                        // set M while logical states of numbers is different
-                        bool isConditionMet = isLowNumberSerieHasTrue && isHighNumberSerieHasFalse;
-                        if (!isConditionMet || !isSerieMCoincidenceFound) {
-                            this->_setTetrit(bitIdx, Constants::TetralogicalState::M);
-
-                            // low number M serie should have bit "1"
-                            if (bitOfFirstNumber) {
-                                isLowNumberSerieHasTrue = true;
-                            }
-                            // high number M serie should have bit "0"
-                            if (!bitOfSecondNumber) {
-                                isHighNumberSerieHasFalse = true;
-                            }
-
-                            continue;
-
-                            // else
-                            // {
-                            //     isMSerieEnd = true;
-                            // }
-                        }
-
-                        // if (!isMSerieEnd)
-                        // {
-                        //     if (isBitDifferent || !(isLowNumberSerieHasTrue && isHighNumberSerieHasFalse))
-                        //     {
-                        //         this->_setTetrit(bitIdx, Constants::TetralogicalState::M);
-                        //         continue;
-                        //     }
-                        //     else
-                        //     {
-                        //         isMSerieEnd = true;
-                        //     }
-                        // }
-
-
-                        this->_setTetrit(bitIdx, Constants::TetralogicalState::A);
-                        continue;
-                    }
-
-                    isMantissaAlreadyDifferent = isBitDifferent;
                     Constants::TetralogicalState tetralogicalState = isBitDifferent ?
-                        Constants::TetralogicalState::M :
+                        postbinaryBit :
                         Utilities::Convert::boolToTetralogicalState(bitOfFirstNumber);
 
+
                     this->_setTetrit(bitIdx, tetralogicalState);
-
-                    if (tetralogicalState == Constants::TetralogicalState::M) {
-                        if (bitOfFirstNumber) {
-                            isLowNumberSerieHasTrue = true;
-                        }
-                        if (!bitOfSecondNumber) {
-                            isHighNumberSerieHasFalse = true;
-                        }
-                    }
-
                     continue;
+
+
+
+
+                    // set all rest exponenta part to AAA... if the difference was found
+                    // if (isMantissaAlreadyDifferent) {
+                    //
+                    //
+                    //     if (!isBitDifferent) {
+                    //         isSerieMCoincidenceFound = true;
+                    //     }
+                    //
+                    //     // if (isSecondMRequired) {
+                    //     //     // set second M after first M tetrit
+                    //     //     this->_setTetrit(bitIdx, Constants::TetralogicalState::M);
+                    //     //     isSecondMRequired = false;
+                    //     //     continue;
+                    //     // }
+                    //
+                    //     // set M while logical states of numbers is different
+                    //     // bool isConditionMet = isLowNumberSerieHasTrue && isHighNumberSerieHasFalse;
+                    //     // if (!isConditionMet || !isSerieMCoincidenceFound) {
+                    //     //     this->_setTetrit(bitIdx, Constants::TetralogicalState::M);
+                    //     //
+                    //     //     // low number M serie should have bit "1"
+                    //     //     if (bitOfFirstNumber) {
+                    //     //         isLowNumberSerieHasTrue = true;
+                    //     //     }
+                    //     //     // high number M serie should have bit "0"
+                    //     //     if (!bitOfSecondNumber) {
+                    //     //         isHighNumberSerieHasFalse = true;
+                    //     //     }
+                    //     //
+                    //     //     continue;
+                    //     //
+                    //     //     // else
+                    //     //     // {
+                    //     //     //     isMSerieEnd = true;
+                    //     //     // }
+                    //     // }
+                    //
+                    //     // if (!isMSerieEnd)
+                    //     // {
+                    //     //     if (isBitDifferent || !(isLowNumberSerieHasTrue && isHighNumberSerieHasFalse))
+                    //     //     {
+                    //     //         this->_setTetrit(bitIdx, Constants::TetralogicalState::M);
+                    //     //         continue;
+                    //     //     }
+                    //     //     else
+                    //     //     {
+                    //     //         isMSerieEnd = true;
+                    //     //     }
+                    //     // }
+                    //
+                    //
+                    //     // this->_setTetrit(bitIdx, Constants::TetralogicalState::A);
+                    //     // continue;
+                    // }
+                    //
+                    // isMantissaAlreadyDifferent = isBitDifferent;
+                    // Constants::TetralogicalState tetralogicalState = isBitDifferent ?
+                    //     Constants::TetralogicalState::M :
+                    //     Utilities::Convert::boolToTetralogicalState(bitOfFirstNumber);
+                    //
+                    // this->_setTetrit(bitIdx, tetralogicalState);
+                    //
+                    // if (tetralogicalState == Constants::TetralogicalState::M) {
+                    //     if (bitOfFirstNumber) {
+                    //         isLowNumberSerieHasTrue = true;
+                    //     }
+                    //     if (!bitOfSecondNumber) {
+                    //         isHighNumberSerieHasFalse = true;
+                    //     }
+                    // }
+                    //
+                    // continue;
                 }
             }
 
