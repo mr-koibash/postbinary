@@ -1,17 +1,17 @@
  #include <iostream>
 
+#include <string>
+#include <algorithm> // Нужно для std::remove
+
+
 #include "Postbinary.h"
 #include "SensorSimulator.h"
 
 int visualiseResults();
 void createBordersFromBytes();
 void test(float& left, float& right);
+void test_rus(float& left, float& right);
 void createTemperatureSimulator();
-
-
-
-
-
 
 
 
@@ -23,16 +23,20 @@ int main() {
 
     //// test
     float a = 17.0134;
-    float b = 18.0928;
+    float b = 17.878;
+
+
+
 
     // a = 2.76;
     // b = 3.24;
 
     test(a, b);
+    test_rus(a, b);
 
 
 
-    Postbinary::Pb128_32ip pb = Postbinary::Pb128_32ip(17.0134, 17.0134, 18.0928, 18.0928);
+    Postbinary::Pb128_32ip pb = Postbinary::Pb128_32ip(a, a, b, b);
 
     // to bytes
     char* pbBegin;
@@ -95,19 +99,32 @@ int visualiseResults() {
 
 
 void createBordersFromBytes() {
-    Postbinary::byte bl1 = 0b01000010;
-    Postbinary::byte bl2 = 0b00111111;
-    Postbinary::byte bl3 = 0b01100111;
-    Postbinary::byte bl4 = 0b00111000;
+    // 01000001 10010000 11001100 11000111
+
+    // число 1мин  = 01000001 11101011 00110011 00110011
+    // число 2мин  = 01000001 11110001 10011001 10011000
+
+    // число 1макс = 01000001 11101011 00010001 00010000
+    // число 2макс = 01000001 11110001 10111011 10111011
+// Lmin: 16.00000 °C	01000001 01111111 11111111 11111111
+// xRmin: 16.00000 °C	01000001 10000000 00000000 00000000
+
+
+
+
+    Postbinary::byte bl1 = 0b01000001;
+    Postbinary::byte bl2 = 0b01111111;
+    Postbinary::byte bl3 = 0b11111111;
+    Postbinary::byte bl4 = 0b11111111;
 
     float lowIntervalBorder = 0;
     Postbinary::Utilities::Convert::bytesToFloat(&lowIntervalBorder, bl1, bl2, bl3, bl4);
 
 
-    Postbinary::byte bh1 = 0b01000010;
-    Postbinary::byte bh2 = 0b01000100;
-    Postbinary::byte bh3 = 0b10100100;
-    Postbinary::byte bh4 = 0b10101000;
+    Postbinary::byte bh1 = 0b01000001;
+    Postbinary::byte bh2 = 0b10000000;
+    Postbinary::byte bh3 = 0b00000000;
+    Postbinary::byte bh4 = 0b00000000;
 
     float highIntervalBorder = 0;
     Postbinary::Utilities::Convert::bytesToFloat(&highIntervalBorder, bh1, bh2, bh3, bh4);
@@ -115,6 +132,52 @@ void createBordersFromBytes() {
     std::cout << "Borders: [" << lowIntervalBorder << ", " << highIntervalBorder << "]" << std::endl;
 }
 
+
+// Вспомогательная функция для форматирования
+std::string formatIEEE754(std::string str) {
+    // 1. Убираем все старые пробелы из строки
+    str.erase(std::remove(str.begin(), str.end(), ' '), str.end());
+
+    // Проверка длины (должно быть 32 символа)
+    if (str.length() != 32) return str;
+
+    // 2. Собираем новую строку: знак + пробел + экспонента + пробел + мантисса
+    return str.substr(0, 1) + " " + str.substr(1, 8) + " " + str.substr(9);
+}
+
+
+void test_rus(float& left, float& right) {
+    std::cout << std::endl << std::endl << "Интервал: [" << left << ", " << right << "]" << std::endl;
+
+    std::cout << "Биты чисел: " << std::endl;
+
+    // Получаем сырую строку битов для left и форматируем
+    std::string bLeft = Postbinary::Utilities::Convert::binaryToString(&left, 4);
+    std::cout << left << " : " << formatIEEE754(bLeft) << std::endl;
+
+    // Получаем сырую строку битов для right и форматируем
+    std::string bRight = Postbinary::Utilities::Convert::binaryToString(&right, 4);
+    std::cout << right << "  : " << formatIEEE754(bRight) << std::endl;
+
+    Postbinary::Pb64_32p postbinaryNumber;
+    postbinaryNumber.convertFromFloat(&left, &right);
+
+    // Форматируем тетракод тоже
+    std::string tCode = postbinaryNumber.toString();
+    std::cout << "Тетракод: "  << formatIEEE754(tCode) << std::endl;
+
+
+    float minRangeStart = 0;
+    float minRangeEnd = 0;
+    postbinaryNumber.getMinimumFloatRange(minRangeStart, minRangeEnd);
+    std::cout << "Minimum range: [" << minRangeStart << "; " << minRangeEnd << "]" << std::endl;
+
+
+    float maxRangeStart = 0;
+    float maxRangeEnd = 0;
+    postbinaryNumber.getMaximumFloatRange(maxRangeStart, maxRangeEnd);
+    std::cout << "Maximum range: [" << maxRangeStart << "; " << maxRangeEnd << "]" << std::endl << std::endl << std::endl;
+}
 
 void test(float& left, float& right) {
     std::cout << "Initial range: [" << left << ", " << right << "]" << std::endl;
