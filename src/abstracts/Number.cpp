@@ -1,21 +1,22 @@
 #include "../../headers/abstracts/Number.h"
 
 namespace Postbinary { namespace Abstracts {
-    Number::Number(Constants::BinaryDigitCapacity bitness) {
-        // calculate number of bytes in binary form
-        unsigned int _number_of_bytes = (unsigned int)bitness / (unsigned int)Constants::DigitNumbers::BITS_NUMBER_IN_BYTE;
+    Number::Number(Constants::TetralogicalDigitCapacity tetritness) :
+        Number::Number(Constants::BinaryDigitCapacity((unsigned int)tetritness * 2)) {   }
 
+    Number::Number(Constants::BinaryDigitCapacity bitness) : 
+        // calculate number of bytes in binary form
+        Number::Number((unsigned int)bitness / (unsigned int)Constants::DigitNumbers::BITS_NUMBER_IN_BYTE) {   }
+
+    Number::Number(unsigned int numberOfBytes) {
         // allocate the memory
-        this->_begin = new byte[_number_of_bytes];
-        this->_end = this->_begin + _number_of_bytes;
+        this->_begin = new byte[numberOfBytes];
+        this->_end = this->_begin + numberOfBytes;
 
         // set number tetrits to A
         this->_setAllTetrits(Constants::TetralogicalState::A);
     }
-
-    Number::Number(Constants::TetralogicalDigitCapacity tetritness) :
-        Number::Number(Constants::BinaryDigitCapacity((unsigned int)tetritness * 2)) {   }
-
+        
     Number::~Number() {
         delete[] this->_begin;
     }

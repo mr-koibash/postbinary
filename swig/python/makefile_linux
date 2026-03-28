@@ -10,11 +10,19 @@ PYTHONL = -Xlinker -export-dynamic
 LIBFLAG = $(shell python3-config --ldflags)
 SWIGEXEC = "/usr/bin/swig"
 
+OBJS = Number_wrap.o Number.o \
+       Fractional_wrap.o Fractional.o \
+       ByteOrder.o Convert.o \
+       Pb64_32p_wrap.o Pb128_32ip_wrap.o \
+       Package_wrap.o Package.o \
+       Compressor_wrap.o Compressor.o \
+       Postbinary_wrap.o
+
 all: Postbinary_pylib
 
-Postbinary_pylib: Number_wrap.o Number.o Fractional_wrap.o Fractional.o ByteOrder.o Convert.o  Pb64_32p_wrap.o Pb128_32ip_wrap.o Postbinary_wrap.o
-	g++ $(PYTHONL) -shared Number_wrap.o Number.o Fractional_wrap.o Fractional.o ByteOrder.o Convert.o  Pb64_32p_wrap.o Pb128_32ip_wrap.o Postbinary_wrap.o -o _Postbinary.so $(LIBFLAG)
-
+Postbinary_pylib: $(OBJS)
+	g++ $(PYTHONL) -shared $(OBJS) -o _Postbinary.so $(LIBFLAG)
+	
 # ----------------------------
 # Interface wrappers
 # main library
@@ -46,6 +54,16 @@ Pb128_32ip_wrap.o: Pb128_32ip_wrap.cxx
 Pb128_32ip_wrap.cxx: Pb128_32ip.i
 	$(SWIGEXEC) $(SWIG_FLAGS) -o Pb128_32ip_wrap.cxx Pb128_32ip.i
 
+Package_wrap.o: Package_wrap.cxx
+	g++ $(FLAGS) $(PYTHONI) -c Package_wrap.cxx -o Package_wrap.o
+Package_wrap.cxx: Package.i
+	$(SWIGEXEC) $(SWIG_FLAGS) -o Package_wrap.cxx Package.i
+
+Compressor_wrap.o: Compressor_wrap.cxx
+	g++ $(FLAGS) $(PYTHONI) -c Compressor_wrap.cxx -o Compressor_wrap.o
+Compressor_wrap.cxx: Compressor.i
+	$(SWIGEXEC) $(SWIG_FLAGS) -o Compressor_wrap.cxx Compressor.i
+
 # ----------------------------
 # Source code
 # Abstracts
@@ -59,6 +77,11 @@ ByteOrder.o: ../../src/utilities/ByteOrder.cpp
 	g++ $(FLAGS) -c ../../src/utilities/ByteOrder.cpp
 Convert.o: ../../src/utilities/Convert.cpp
 	g++ $(FLAGS) -c ../../src/utilities/Convert.cpp
+
+Compressor.o: ../../src/utilities/Compressor.cpp
+	g++ $(FLAGS) -c ../../src/utilities/Compressor.cpp
+Package.o: ../../src/types/Package.cpp
+	g++ $(FLAGS) -c ../../src/types/Package.cpp
 
 clean:
 	rm -f *.o *.cxx

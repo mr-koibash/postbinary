@@ -10,8 +10,10 @@ add_executable(
     main.cpp
     src/abstracts/Fractional.cpp
     src/abstracts/Number.cpp
+    src/types/Package.cpp
     src/utilities/ByteOrder.cpp
     src/utilities/Convert.cpp
+    src/utilities/Compressor.cpp
 )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

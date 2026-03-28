@@ -25,8 +25,9 @@ namespace Postbinary { namespace Abstracts {
         pointer _end;	// end of memory area
 
     public:
-        Number(Constants::BinaryDigitCapacity bitness);
         Number(Constants::TetralogicalDigitCapacity tetritness);
+        Number(Constants::BinaryDigitCapacity bitness);
+        Number(unsigned int numberOfBytes);
         virtual ~Number() = 0;
 
         // --------Get main pointers--------
