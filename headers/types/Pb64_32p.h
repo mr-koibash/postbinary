@@ -65,5 +65,12 @@ namespace Postbinary {
         void convertFromFloat(float* number1, float* number2) {
             Abstracts::Fractional::_convertFromBinaryRange(number1, number2, sizeof(float));
         }
+
+        // TODO rewrite with inheritance
+        void applyQuantization(int k) {
+            for (int i = k - 1; i >= 2; i--) {
+                this->_setTetrit(i, Constants::TetralogicalState::A);
+            }
+        }
     };
 }

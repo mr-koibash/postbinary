@@ -1,14 +1,17 @@
 %module Number
 %{
-  #include "../../headers/abstracts/Number.h"
-  using namespace Postbinary;
-  using namespace Postbinary::Abstracts;
+    #include "../../headers/Constants.h"
+    #include "../../headers/abstracts/Number.h"
+    using namespace Postbinary;
+    using namespace Postbinary::Abstracts;
+    using namespace Postbinary::Constants;
 %}
 
 %include "std_string.i"
-
-
 %include "typemaps.i"
+
+// SWIG will find about tetralogical states before methods get/set tetrits
+%include "../../headers/Constants.h"
 
 // interprete <bytes> as chars
 %typemap(in) (char *source) {
@@ -24,4 +27,5 @@
 %typemap(argout) (char **begin, int& size) {
     $result = PyBytes_FromStringAndSize(*$1, *$2);
 }
+
 %include "../../headers/abstracts/Number.h"

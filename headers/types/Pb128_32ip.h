@@ -79,5 +79,16 @@ namespace Postbinary {
 
             return _right;
         }
+
+        // TODO rewrite with inheritance
+        void applyQuantization(int k) {
+            for (int i = k + 31; i >= 34; i--) {
+                this->_setTetrit(i, Constants::TetralogicalState::A);
+            }
+
+            for (int i = k + 1; i >= 4; i--) {
+                this->_setTetrit(i, Constants::TetralogicalState::A);
+            }
+        }
     };
 }
